@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dengzhiwei | AIGC Designer Portfolio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        /* 全局图片背景 - 高斯模糊效果 */
+        .custom-site-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            background-image: url('https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/9f5435054c3f3f2802c0410b833fdaceea212004d9f20-fj1mS0.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: blur(60px); /* 高斯模糊效果 */
+            opacity: 0.45; /* 适当透明度以融合暗色主题 */
+            transform: scale(1.1); /* 略微放大以消除模糊边缘的白边 */
+            pointer-events: none;
+        }
+
+        /* 弥散背景动效 */
+        @keyframes float-1 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(60px, -40px) scale(1.2); }
+            66% { transform: translate(-30px, 30px) scale(0.8); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes float-2 {
+            0% { transform: translate(0, 0) scale(1.1); }
+            50% { transform: translate(-50px, 50px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1.1); }
+        }
+
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.35;
+            z-index: -2;
+            mix-blend-mode: screen;
+        }
+        .blob-1 { animation: float-1 15s infinite ease-in-out; background: #4f46e5; width: 600px; height: 600px; top: -10%; left: -10%; }
+        .blob-2 { animation: float-2 12s infinite ease-in-out; background: #9333ea; width: 500px; height: 500px; bottom: -10%; right: -10%; }
+
+        /* 科技网格背景 */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.03) 1px, transparent 0);
+            background-size: 40px 40px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 扫描线动画 */
+        @keyframes scanline {
+            0% { transform: translateY(-100%); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+        .scanline-overlay {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
+            z-index: -1;
+            animation: scanline 8s linear infinite;
+        }
+
+        /* 能量流线动画 */
+        @keyframes flow {
+            0% { stroke-dashoffset: 1000; opacity: 0; }
+            20% { opacity: 0.5; }
+            80% { opacity: 0.5; }
+            100% { stroke-dashoffset: -1000; opacity: 0; }
+        }
+        .energy-stream {
+            stroke-dasharray: 500;
+            animation: flow 10s linear infinite;
+        }
+
+        .side-text {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.4em;
+            color: rgba(255, 255, 255, 0.12);
+            text-transform: uppercase;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+            writing-mode: vertical-rl;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.1s ease, border-color 0.4s ease, background 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(60px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { opacity: 0; transition: all 1s ease; }
+        .reveal.active { animation: fadeInUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        /* 首页标题增强光效 */
+        @keyframes textShimmer {
+            0% { background-position: -200% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        .animate-shimmer {
+            background: linear-gradient(110deg, #fff 30%, #6366f1 45%, #a855f7 50%, #6366f1 55%, #fff 70%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: textShimmer 5s linear infinite;
+            filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.5));
+        }
+
+        /* 标题扫光进度条装饰 */
+        .title-scanner {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #6366f1, transparent);
+            animation: titleScan 3s ease-in-out infinite;
+            opacity: 0.3;
+        }
+        @keyframes titleScan {
+            0%, 100% { transform: translateY(-30px); opacity: 0; }
+            50% { transform: translateY(30px); opacity: 0.8; }
+        }
+
+        .card-halo {
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y),
+                rgba(99, 102, 241, 0.15),
+                transparent 45%
+            );
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .glass-card:hover .card-halo {
+            opacity: 1;
+        }
+
+        .masonry-grid {
+            columns: 1;
+            column-gap: 2.5rem;
+        }
+        @media (min-width: 768px) {
+            .masonry-grid { columns: 2; }
+        }
+
+        .text-stroke {
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+            color: transparent;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .corner-mark {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        const Icon = ({ name, size = 24, weight = "regular", className = "" }) => (
+            <i className={`ph ph-${name} ${className}`} style={{ fontSize: size, fontWeight: weight }}></i>
+        );
+
+        const InteractiveCard = ({ children, className = "" }) => {
+            const cardRef = useRef(null);
+            const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+            const [rotate, setRotate] = useState({ x: 0, y: 0 });
+
+            const handleMouseMove = (e) => {
+                if (!cardRef.current) return;
+                const rect = cardRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                setMousePos({ x, y });
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / 80; 
+                const rotateY = (centerX - x) / 80;
+                setRotate({ x: rotateX, y: rotateY });
+            };
+
+            const handleMouseLeave = () => {
+                setRotate({ x: 0, y: 0 });
+            };
+
+            return (
+                <div 
+                    ref={cardRef}
+                    className={`relative glass-card overflow-hidden group ${className}`}
+                    onMouseMove={handleMouseMove}
+                    onMouseLeave={handleMouseLeave}
+                    style={{ 
+                        '--mouse-x': `${mousePos.x}px`, 
+                        '--mouse-y': `${mousePos.y}px`,
+                        transform: `perspective(1200px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
+                        transition: 'transform 0.2s ease-out'
+                    }}
+                >
+                    <div className="card-halo"></div>
+                    <div className="relative z-10">{children}</div>
+                </div>
+            );
+        };
+
+        const FloatingDecoration = ({ text, className = "" }) => (
+            <div className={`absolute pointer-events-none select-none ${className}`}>
+                <span className="text-[10px] font-mono text-white/10 uppercase tracking-widest border-l border-white/5 pl-2">{text}</span>
+            </div>
+        );
+
+        const FollowButtonSlider = () => {
+            const [activeIndex, setActiveIndex] = useState(0);
+            return (
+                <div className="reveal active relative flex p-1.5 bg-white/5 border border-white/10 rounded-full backdrop-blur-xl w-fit mx-auto" style={{ animationDelay: '0.4s' }}>
+                    <div 
+                        className="absolute top-1.5 left-1.5 h-[calc(100%-12px)] bg-white rounded-full transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) shadow-xl"
+                        style={{ 
+                            width: '140px',
+                            transform: `translateX(${activeIndex * 144}px)`
+                        }}
+                    ></div>
+                    <button 
+                        className={`relative z-10 w-[140px] py-4 text-sm font-black tracking-widest transition-colors duration-300 ${activeIndex === 0 ? 'text-black' : 'text-gray-300'}`}
+                        onMouseEnter={() => setActiveIndex(0)}
+                        onClick={() => document.getElementById('作品').scrollIntoView({behavior:'smooth'})}
+                    >
+                        查看作品
+                    </button>
+                    <button 
+                        className={`relative z-10 w-[140px] py-4 text-sm font-black tracking-widest transition-colors duration-300 ${activeIndex === 1 ? 'text-black' : 'text-gray-300'}`}
+                        onMouseEnter={() => setActiveIndex(1)}
+                        onClick={() => document.getElementById('联系').scrollIntoView({behavior:'smooth'})}
+                    >
+                        与我联系
+                    </button>
+                </div>
+            );
+        };
+
+        const RadarChart = ({ data }) => {
+            const [hoveredIdx, setHoveredIdx] = useState(null);
+            const size = 380;
+            const center = size / 2;
+            const radius = size * 0.35;
+            const angleStep = (Math.PI * 2) / data.length;
+            const points = useMemo(() => data.map((d, i) => ({
+                x: center + radius * (d.value / 100) * Math.cos(i * angleStep - Math.PI / 2),
+                y: center + radius * (d.value / 100) * Math.sin(i * angleStep - Math.PI / 2)
+            })), [data]);
+            const polygonPoints = points.map(p => `${p.x},${p.y}`).join(' ');
+
+            return (
+                <div className="relative inline-block group/radar">
+                    <svg width={size} height={size} className="drop-shadow-[0_0_30px_rgba(99,102,241,0.2)] mx-auto overflow-visible">
+                        {[0.2, 0.4, 0.6, 0.8, 1].map((p, i) => (<circle key={i} cx={center} cy={center} r={radius * p} fill="none" stroke="rgba(255,255,255,0.05)" />))}
+                        {data.map((_, i) => (<line key={i} x1={center} y1={center} x2={center + radius * Math.cos(i * angleStep - Math.PI / 2)} y2={center + radius * Math.sin(i * angleStep - Math.PI / 2)} stroke="rgba(255,255,255,0.1)" />))}
+                        <polygon points={polygonPoints} fill="rgba(99, 102, 241, 0.2)" stroke="#6366f1" strokeWidth="3" className="transition-all duration-500 ease-out" />
+                        {hoveredIdx !== null && (
+                            <line x1={center} y1={center} x2={points[hoveredIdx].x} y2={points[hoveredIdx].y} stroke="#fff" strokeWidth="1" strokeDasharray="4 4" className="animate-pulse" />
+                        )}
+                        {points.map((p, i) => (
+                            <g key={i} onMouseEnter={() => setHoveredIdx(i)} onMouseLeave={() => setHoveredIdx(null)} className="cursor-pointer">
+                                <circle cx={p.x} cy={p.y} r={hoveredIdx === i ? 10 : 5} fill={hoveredIdx === i ? "#fff" : "#6366f1"} className="transition-all duration-300 shadow-lg" />
+                                <text x={center + (radius + 50) * Math.cos(i * angleStep - Math.PI / 2)} y={center + (radius + 50) * Math.sin(i * angleStep - Math.PI / 2)} fill={hoveredIdx === i ? "#fff" : "rgba(255,255,255,0.7)"} fontSize="15" fontWeight="bold" textAnchor="middle" alignmentBaseline="middle" className="transition-all duration-300 tracking-tight">{data[i].subject}</text>
+                                {hoveredIdx === i && (
+                                    <g transform={`translate(${p.x - 20}, ${p.y - 35})`}><rect width="40" height="24" rx="12" fill="white" /><text x="20" y="16" fill="black" fontSize="12" fontWeight="bold" textAnchor="middle">{data[i].value}%</text></g>
+                                )}
+                            </g>
+                        ))}
+                    </svg>
+                    <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-white/5"></div>
+                    <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-white/5"></div>
+                </div>
+            );
+        };
+
+        const SectionHeader = ({ zh, en, num }) => (
+            <div className="reveal flex items-end gap-6 mb-16 px-4 relative">
+                <div className="flex flex-col relative z-10">
+                    <span className="text-indigo-400 font-mono text-xl mb-2 tracking-[0.2em]">{num}</span>
+                    <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-none">{en}</h2>
+                    <span className="text-xl md:text-2xl text-gray-400 font-medium mt-2">{zh}</span>
+                </div>
+                <div className="h-[2px] flex-1 bg-gradient-to-r from-white/20 via-indigo-500/20 to-transparent mb-3"></div>
+                <div className="absolute right-0 bottom-3 hidden md:flex gap-1">
+                    {[1,2,3,4].map(i => <div key={i} className="w-1 h-1 bg-white/10 rounded-full"></div>)}
+                </div>
+            </div>
+        );
+
+        const Navbar = () => {
+            const [scrolled, setScrolled] = useState(false);
+            useEffect(() => {
+                const onScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', onScroll);
+                return () => window.removeEventListener('scroll', onScroll);
+            }, []);
+            const navItems = [{ id: '简介', label: '个人简介' }, { id: '技术', label: '核心技术' }, { id: '历程', label: '职业历程' }, { id: '作品', label: '精选作品' }, { id: '联系', label: '与我联系' }];
+            return (
+                <div className="fixed top-6 left-0 w-full z-50 flex justify-center px-6">
+                    <nav className={`transition-all duration-700 flex items-center px-8 py-3 rounded-full border border-white/10 backdrop-blur-3xl ${scrolled ? 'bg-black/60 shadow-2xl scale-95' : 'bg-transparent'}`}>
+                        <div className="flex items-center gap-10 font-black text-base tracking-tighter italic mr-8 border-r border-white/10 pr-8 hidden sm:flex text-indigo-400 uppercase">D.DESIGNER</div>
+                        <div className="flex gap-6 sm:gap-10 text-[13px] font-bold text-gray-300 tracking-wider">
+                            {navItems.map(item => (<button key={item.id} onClick={() => document.getElementById(item.id).scrollIntoView({behavior:'smooth'})} className="hover:text-white transition-colors relative group">
+                                {item.label}
+                                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-indigo-500 transition-all group-hover:w-full"></span>
+                            </button>))}
+                        </div>
+                    </nav>
+                </div>
+            );
+        };
+
+        const Hero = () => (
+            <section id="home" className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative overflow-hidden">
+                {/* 能量流线背景 */}
+                <div className="absolute inset-0 pointer-events-none z-[-1] opacity-40">
+                    <svg width="100%" height="100%" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M-100 600C200 550 500 700 800 600C1100 500 1300 650 1600 600" stroke="url(#paint0_linear)" strokeWidth="2" className="energy-stream" />
+                        <path d="M-100 200C300 250 600 100 900 200C1200 300 1400 150 1700 200" stroke="url(#paint1_linear)" strokeWidth="2" className="energy-stream" style={{animationDelay: '-3s'}} />
+                        <path d="M-100 400C400 350 700 450 1000 400C1300 350 1500 450 1800 400" stroke="url(#paint2_linear)" strokeWidth="1" className="energy-stream" style={{animationDelay: '-6s'}} />
+                        <defs>
+                            <linearGradient id="paint0_linear" x1="-100" y1="600" x2="1600" y2="600" gradientUnits="userSpaceOnUse">
+                                <stop stopColor="#4F46E5" stopOpacity="0" />
+                                <stop offset="0.5" stopColor="#4F46E5" />
+                                <stop offset="1" stopColor="#4F46E5" stopOpacity="0" />
+                            </linearGradient>
+                            <linearGradient id="paint1_linear" x1="-100" y1="200" x2="1700" y2="200" gradientUnits="userSpaceOnUse">
+                                <stop stopColor="#9333EA" stopOpacity="0" />
+                                <stop offset="0.5" stopColor="#9333EA" />
+                                <stop offset="1" stopColor="#9333EA" stopOpacity="0" />
+                            </linearGradient>
+                            <linearGradient id="paint2_linear" x1="-100" y1="400" x2="1800" y2="400" gradientUnits="userSpaceOnUse">
+                                <stop stopColor="#3B82F6" stopOpacity="0" />
+                                <stop offset="0.5" stopColor="#3B82F6" />
+                                <stop offset="1" stopColor="#3B82F6" stopOpacity="0" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                {/* 中心放射光晕 */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-indigo-500/20 via-purple-500/5 to-transparent pointer-events-none z-[-1] blur-[80px]"></div>
+
+                <FloatingDecoration text="AIGC Protocol v4.0" className="top-1/4 left-10" />
+                <FloatingDecoration text="Lat: 30.65 Lng: 104.06" className="bottom-1/3 right-12" />
+                <div className="reveal active inline-block px-5 py-2 mb-10 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-sm font-black tracking-widest uppercase">
+                    个人网站 / PERSONAL SITE
+                </div>
+                
+                <div className="relative inline-block mb-10 group">
+                    <div className="title-scanner"></div>
+                    <h1 className="reveal active text-[16vw] md:text-[11vw] font-black leading-[0.85] tracking-tighter relative z-10">
+                        <span className="block animate-shimmer">AIGC</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 drop-shadow-2xl">创意设计师</span>
+                    </h1>
+                    <div className="absolute -top-12 -right-8 text-[8vw] font-black text-white/[0.02] italic select-none hidden lg:block">01</div>
+                </div>
+
+                <p className="reveal active text-gray-400 text-lg md:text-xl max-w-3xl font-light mb-16 leading-relaxed mx-auto opacity-90 border-l-2 border-indigo-500/30 pl-6" style={{ animationDelay: '0.2s' }}>
+                    努力成为既能精准落地需求，又能引领创意方向，<br className="hidden md:block" />
+                    兼具专业性与创新性的AIGC设计师。
+                </p>
+                
+                <FollowButtonSlider />
+                
+                <div className="absolute bottom-12 animate-bounce text-indigo-500/50 flex flex-col items-center gap-2">
+                    <span className="text-[10px] font-mono uppercase tracking-[0.3em]">Explore</span>
+                    <Icon name="caret-down" size={24} />
+                </div>
+            </section>
+        );
+
+        const About = () => {
+            const profileData = [
+                { label: '姓名', value: 'Dengzhiwei', icon: 'user' },
+                { label: '现居', value: '中国，成都', icon: 'map-pin' },
+                { label: '院校', value: '四川音乐学院', icon: 'graduation-cap' },
+                { label: '学历', value: '大专', icon: 'certificate' },
+                { label: '年龄', value: '26岁', icon: 'calendar' },
+                { label: '微信', value: 'z1257388778', icon: 'wechat-logo' },
+                { label: '经验', value: '5年', icon: 'briefcase' },
+                { label: '性格', value: 'ESTJ', icon: 'target' }
+            ];
+
+            return (
+                <section id="简介" className="py-32 px-6 max-w-[1400px] mx-auto relative">
+                    <FloatingDecoration text="Binary_Stream: 01011001" className="top-1/2 -left-20 rotate-90" />
+                    <SectionHeader num="01" en="PROFILE" zh="个人简介" />
+                    <InteractiveCard className="rounded-[3rem] border-white/10 overflow-hidden relative">
+                        <div className="absolute top-0 left-0 w-1/3 h-[1px] bg-gradient-to-r from-indigo-500 to-transparent"></div>
+                        <div className="absolute bottom-0 right-0 w-1/3 h-[1px] bg-gradient-to-l from-indigo-500 to-transparent"></div>
+
+                        <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-white/10">
+                            <div className="w-full lg:w-7/12 p-8 md:p-14 relative overflow-hidden text-left">
+                                <h3 className="text-indigo-400 font-bold tracking-widest text-[10px] uppercase mb-10 flex items-center gap-4 opacity-70">
+                                    <span className="w-8 h-[1px] bg-indigo-500"></span>
+                                    Identity Data Matrix
+                                </h3>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10 relative z-10">
+                                    {profileData.map((item, i) => (
+                                        <div key={i} className="group/item">
+                                            <div className="flex items-center gap-2 mb-2 opacity-50 group-hover/item:opacity-100 transition-opacity">
+                                                <Icon name={item.icon} size={14} className="text-indigo-400" />
+                                                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{item.label}</div>
+                                            </div>
+                                            <div className="text-base md:text-lg font-bold text-white group-hover/item:text-indigo-300 transition-colors leading-tight tracking-tight">{item.value}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex-1 p-8 md:p-14 flex flex-col justify-center bg-white/[0.01]">
+                                <div className="relative text-left">
+                                    <Icon name="quotes" weight="fill" className="absolute -top-8 -left-8 text-indigo-500/10" size={80} />
+                                    <div className="space-y-6 relative z-10">
+                                        <p className="text-gray-300 text-lg md:text-xl font-light leading-relaxed text-justify italic tracking-wide">
+                                            渴望加入一支重视创新、尊重创意的团队，将自身 AI 创作能力与团队需求深度结合，用技术赋能创意，用创意创造价值。
+                                        </p>
+                                        <div className="h-[1px] w-20 bg-indigo-500/40"></div>
+                                        <p className="text-gray-400 text-sm md:text-base font-light leading-relaxed text-justify opacity-80">
+                                            未来，我将持续深耕 AI 视频与 AI 创意领域，不断提升自身的综合素养，紧跟行业趋势，探索 AIGC 设计的更多可能性。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </InteractiveCard>
+                </section>
+            );
+        };
+
+        const Tech = () => {
+            const skills = [
+                { subject: '3Dmax / D5', value: 90, desc: '室内建模与实时渲染' },
+                { subject: 'ComfyUI', value: 90, desc: '节点工作流逻辑构建' },
+                { subject: 'Photoshop', value: 95, desc: '后期精修与 AI 合成' },
+                { subject: 'ChatGPT', value: 60, desc: '提示词逻辑辅助' },
+                { subject: 'Nanobnana', value: 75, desc: '多模态模型应用' },
+                { subject: 'Midjourney', value: 65, desc: '艺术审美生成' },
+                { subject: 'SD', value: 75, desc: '本地微调与控制' },
+                { subject: '即梦/可灵', value: 85, desc: 'AI 视频动态生成' }
+            ];
+
+            return (
+                <section id="技术" className="py-32 px-6 max-w-[1400px] mx-auto relative text-left">
+                    <FloatingDecoration text="Process_Memory: Optimized" className="bottom-0 left-0" />
+                    <SectionHeader num="02" en="SKILLSET" zh="核心技术力" />
+                    <div className="flex flex-col xl:flex-row items-center gap-20 glass-card p-12 md:p-16 rounded-[4rem] border-white/10 shadow-2xl relative">
+                        <div className="absolute top-10 right-10 flex flex-col gap-1 opacity-10">
+                            {[1,2,3,4,5].map(i => <div key={i} className="w-12 h-[2px] bg-white"></div>)}
+                        </div>
+
+                        <div className="reveal shrink-0 w-full xl:w-auto"><RadarChart data={skills} /></div>
+                        <div className="flex-1 w-full">
+                            <div className="reveal mb-14 border-l-4 border-indigo-600 pl-8">
+                                <h3 className="text-3xl font-black tracking-tighter mb-4 italic text-white uppercase leading-none">能力矩阵解析</h3>
+                                <p className="text-gray-400 text-lg md:text-xl font-light leading-relaxed opacity-80">融合传统空间建模与 AIGC 深度创作，实现从概念、建模到全维度视觉呈现的效率革命。</p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
+                                {skills.map((skill, i) => (
+                                    <div key={i} className="reveal group" style={{ animationDelay: `${i*0.05}s` }}>
+                                        <div className="flex justify-between items-end mb-4">
+                                            <div className="font-black text-xl md:text-2xl uppercase group-hover:text-indigo-400 transition-colors tracking-tighter">{skill.subject}</div>
+                                            <div className="font-mono text-indigo-500 font-bold text-lg">{skill.value}%</div>
+                                        </div>
+                                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden mb-4 relative">
+                                            <div className="h-full bg-gradient-to-r from-indigo-600 to-purple-600 transition-all duration-1000 shadow-[0_0_15px_rgba(99,102,241,0.4)]" style={{ width: `${skill.value}%` }}></div>
+                                            <div className="absolute top-0 right-0 h-full w-2 bg-white/20 animate-pulse"></div>
+                                        </div>
+                                        <p className="text-[13px] text-gray-500 font-bold uppercase tracking-wider opacity-70">{skill.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const Experience = () => {
+            const journey = [
+                { year: '2023 — 2025', company: '成都市宽与家居', title: '前端设计师', details: ['负责客户主要室内设计工作', '利用3Dmax、PS与AI辅助完成', '提供选材及软装搭配建议'], tags: ['3Dmax', 'Photoshop', 'D5', 'ComfyUI'] },
+                { year: '2022 — 2023', company: '成都市金牌家居', title: '设计部', details: ['负责室内设计效果图方案', '利用SketchUP、PS与酷家乐', '对接微改及后期深化设计'], tags: ['SketchUP', 'Photoshop', '酷家乐', '三维家'] },
+                { year: '2020 — 2022', company: '深圳艺标家居', title: '策划部设计师', details: ['负责室内效果与展陈设计', '平面设计与活动方案制定', '酷家乐方案深化与表现'], tags: ['SketchUP', 'Photoshop', '酷家乐'] }
+            ];
+            return (
+                <section id="历程" className="py-32 px-6 max-w-[1400px] mx-auto relative overflow-hidden text-left">
+                    <SectionHeader num="03" en="JOURNEY" zh="历程与积淀" />
+                    <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-indigo-500/20 to-transparent hidden lg:block"></div>
+                    <div className="space-y-24 relative z-10">
+                        {journey.map((item, i) => (
+                            <div key={i} className={`reveal flex flex-col ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center group relative`}>
+                                <div className="w-full lg:w-[55%] relative">
+                                    <div className={`absolute top-1/2 ${i % 2 === 0 ? '-right-3' : '-left-3'} w-6 h-6 rounded-full bg-black border-2 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)] z-20 hidden lg:block transform -translate-y-1/2 transition-transform group-hover:scale-125`}></div>
+                                    <InteractiveCard className="p-10 md:p-14 rounded-[3.5rem] bg-white/[0.02] border-white/10 shadow-2xl relative">
+                                        <div className="flex flex-col mb-10 border-b border-white/5 pb-8 relative">
+                                            <div className="text-4xl md:text-6xl font-black text-indigo-500/80 tracking-tighter mb-4 italic font-mono opacity-80 group-hover:opacity-100 transition-opacity">{item.year.split(' — ')[0]}</div>
+                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                                <div>
+                                                    <h4 className="text-2xl md:text-3xl font-black tracking-tight text-white group-hover:text-indigo-300 transition-colors leading-none uppercase">{item.title}</h4>
+                                                    <p className="text-indigo-400 font-black text-xs tracking-[0.2em] uppercase mt-2 opacity-80">{item.company}</p>
+                                                </div>
+                                                <div className="text-[11px] text-gray-400 font-mono tracking-widest uppercase bg-white/5 px-4 py-1.5 rounded-full border border-white/5">{item.year}</div>
+                                            </div>
+                                        </div>
+                                        <ul className="space-y-5 mb-10">
+                                            {item.details.map((d, idx) => (
+                                                <li key={idx} className="flex gap-4 text-gray-300 text-lg font-light leading-relaxed group-hover:text-white transition-colors">
+                                                    <Icon name="caret-right" size={20} weight="bold" className="text-indigo-600 mt-1 shrink-0" />
+                                                    {d}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <div className="flex flex-wrap gap-3">
+                                            {item.tags.map((tag, idx) => (<span key={idx} className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[11px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-indigo-300 group-hover:border-indigo-500/30 transition-all">{tag}</span>))}
+                                        </div>
+                                    </InteractiveCard>
+                                </div>
+                                <div className="hidden lg:block flex-1"></div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            );
+        };
+
+        const Works = () => {
+            const [selectedWork, setSelectedWork] = useState(null);
+            const workItems = [
+                { id: 1, type: 'video', img: 'https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/31.jpg', videoSrc: 'https://sns-video-hw.xhscdn.com/stream/1/110/258/01e985b616b7776e010370019c325415ec_258.mp4', title: '小米YU7 AIGC 宣传片', cat: 'VIDEO PRODUCTION', detail: '这是一部全AI流程制作的小米YU7宣传短片。\n\n创作核心在于利用 Nanobnana (Gemini Image) 和 Midjourney 协同生成极具电影感的高品质分镜图；随后通过可灵 (Kling) 强大的时序一致性生成连贯、真实的视频片段。为了追求极致的 4K 视觉表现，采用了 SeedVR2 进行视频超分辨率放大处理，最终在剪映中完成精密的后期剪辑与视听同步。整个流程展示了 AIGC 在商业广告领域的高效生产力。' },
+                { id: 2, type: 'image', img: 'https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/Game%20Poster%20Layout%20with%20Main%20Title%20Clover%20in%20Handwritten%20Font%20and%20Decorative%20Text.png', gallery: ['https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/Game%20Poster%20Layout%20with%20Main%20Title%20Clover%20in%20Handwritten%20Font%20and%20Decorative%20Text.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/3D%20Style%20Character%20with%20Blue%20Gradient%20Background.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/3D%20Style%20Mechanical%20Bird%20with%20Tail%20Flame%20and%20Blue%20Gradient%20Background.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/18cdb38419288ed58cb0f69de.jpg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/uaoawz74264w_Anime_style_full-body_profile_view_of_a_cool_girl__8464a7a2-5f33-4569-8c62-1e424a730475.png'], title: '原创数字人/IP设计', cat: 'CHARACTER DESIGN', detail: '本项目展示了从概念构思到最终视觉呈现的全流程数字IP设计。起初通过手绘确定人物的基本构图与动态（Line Art），随后利用精准的提示词工程（Prompt Engineering）并在 Midjourney中保持角色一致性生成细节，最终通过Nanobnana生成具有 4K 建模级别精度的 3D 视觉形象。' },
+                { id: 3, type: 'image', img: 'https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/01.jpg', gallery: ['https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/01.jpg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/02.jpg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/03.jpg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/04.jpg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/05.jpg'], title: '潮玩文创IP设计', cat: 'IP DESIGN', detail: '本项目展示了潮玩文创IP的全流程设计。通过预设主题融合灵感，生成出花样繁多的IP衍生设计。整个设计流程通过 AIGC 高效赋能：首先使用 Midjourney 生成创意草图，接着利用 Flux 进行局部重绘，最后通过 Nanobnana 进行全局的精细化渲染处理。' },
+                { id: 4, type: 'image', img: 'https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/1765357640858-rmpy6n7to0d.png', gallery: ['https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/1765357640858-rmpy6n7to0d.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/98c68e16831fd58cfffcf8c836d86d2c.png','https://raw.githubusercontent.com/dzw1257388778-Netizen/-/refs/Heads/Main/98ed255cc076c870b40c0f59385b883c.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/f89c7d6ed9c8a42d092b7792a9410b73.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/fc478876b87638a5227e139d0ccd9467.jpeg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/%E7%BE%8E%E5%BC%8F%E9%A3%8E%E6%A0%BC.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/%E5%8F%82%E8%80%83.jpg'], title: 'AI 空间重构：毛坯转风格化设计', cat: 'INTERIOR DESIGN', detail: '核心技术基于 ComfyUI 深度定制的节点工作流，实现了在严格保留原始毛坯房建筑结构的前提下，进行多风格的一键式高精度渲染生成。将创意出图速度提升了 90% 以上。' }
+            ];
+
+            return (
+                <section id="作品" className="py-32 px-6 max-w-[1600px] mx-auto relative text-left">
+                    <FloatingDecoration text="Renderer_Engine: AIGC_01" className="top-10 right-20 rotate-12" />
+                    <SectionHeader num="04" en="WORKS" zh="精选作品" />
+                    <div className="reveal masonry-grid">
+                        {workItems.map((w, i) => (
+                            <div key={w.id} className="break-inside-avoid mb-10 group relative rounded-[3.5rem] overflow-hidden glass-card cursor-pointer shadow-2xl border-white/5" onClick={() => setSelectedWork(w)}>
+                                <img src={w.img} className="w-full grayscale-[0.3] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105" />
+                                {w.type === 'video' && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
+                                            <Icon name="play" weight="fill" size={32} className="text-white ml-1" />
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent flex items-end p-12 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="transform translate-y-6 group-hover:translate-y-0 transition-transform duration-700">
+                                        <span className="text-indigo-400 text-[13px] font-black tracking-[0.4em] mb-3 block uppercase">{w.cat}</span>
+                                        <h3 className="text-4xl font-black italic tracking-tighter uppercase leading-none">{w.title}</h3>
+                                    </div>
+                                </div>
+                                <div className="absolute top-6 right-6 w-6 h-6 border-t-2 border-r-2 border-white/20 group-hover:border-indigo-500/50 transition-colors"></div>
+                            </div>
+                        ))}
+                    </div>
+                    {selectedWork && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6" onClick={() => setSelectedWork(null)}>
+                            <div className="absolute inset-0 bg-black/95 backdrop-blur-3xl"></div>
+                            <div className="reveal active glass-card w-full max-w-6xl rounded-[4rem] overflow-hidden relative z-10 flex flex-col lg:flex-row bg-neutral-950 border-white/10 max-h-[90vh]" onClick={e => e.stopPropagation()}>
+                                <button className="absolute top-8 right-8 w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 z-30" onClick={() => setSelectedWork(null)}><Icon name="x" weight="bold" /></button>
+                                <div className="lg:w-3/5 relative overflow-y-auto no-scrollbar bg-[#0a0a0a]">
+                                    {selectedWork.videoSrc ? (
+                                        <div className="h-full flex items-center justify-center bg-black"><video src={selectedWork.videoSrc} controls autoPlay className="w-full max-h-full" /></div>
+                                    ) : selectedWork.gallery ? (
+                                        <div className="flex flex-col gap-4 p-4 md:p-8">{selectedWork.gallery.map((src, idx) => (<img key={idx} src={src} className="w-full rounded-3xl shadow-2xl" alt={`gallery-${idx}`} />))}</div>
+                                    ) : (<div className="h-full"><img src={selectedWork.img} className="w-full h-full object-cover" /></div>)}
+                                </div>
+                                <div className="lg:w-2/5 p-12 md:p-16 flex flex-col justify-start overflow-y-auto bg-neutral-950/50 backdrop-blur-sm border-l border-white/5 text-left">
+                                    <span className="text-indigo-500 font-black text-xs tracking-[0.3em] uppercase mb-8">{selectedWork.cat}</span>
+                                    <h3 className="text-4xl font-black mb-10 tracking-tighter leading-tight uppercase leading-none">{selectedWork.title}</h3>
+                                    <div className="h-[1px] w-12 bg-white/10 mb-8"></div>
+                                    <p className="text-gray-300 leading-relaxed text-lg font-light mb-12 whitespace-pre-wrap text-justify">{selectedWork.detail}</p>
+                                    <div className="mt-auto pt-8 border-t border-white/5 flex gap-4"><div className="px-5 py-2 rounded-full border border-white/10 text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-60">AIGC Showcase</div><div className="px-5 py-2 rounded-full border border-white/10 text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-60">2024 Project</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </section>
+            );
+        };
+
+        const Contact = () => {
+            const [showWechat, setShowWechat] = useState(false);
+            return (
+                <section id="联系" className="py-32 px-6 max-w-[1200px] mx-auto text-center relative">
+                    <FloatingDecoration text="Signal_Strength: High" className="top-1/2 -right-10" />
+                    <SectionHeader num="05" en="CONNECT" zh="与我联系" />
+                    <div className="reveal glass-card p-16 md:p-24 rounded-[5.5rem] relative overflow-hidden shadow-2xl border-indigo-500/20">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent"></div>
+                        <h2 className="text-6xl md:text-[100px] font-black mb-16 tracking-tighter uppercase italic text-glow leading-none">GET IN TOUCH</h2>
+                        <div className="flex flex-col md:flex-row justify-center gap-16 relative z-10">
+                            <div className="flex flex-col items-center group cursor-pointer" onClick={() => setShowWechat(true)}>
+                                <div className="w-24 h-24 rounded-[2.5rem] bg-white/5 border border-white/10 flex items-center justify-center text-green-400 mb-6 group-hover:scale-110 transition-all shadow-2xl relative">
+                                    <Icon name="wechat-logo" size={56} weight="fill" />
+                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
+                                </div>
+                                <div className="text-[13px] text-gray-400 font-black mb-2 uppercase tracking-[0.3em] opacity-60">WeChat</div>
+                                <div className="text-3xl font-black tracking-tighter text-white">z1257388778</div>
+                            </div>
+                            <a href="https://www.xiaohongshu.com/user/profile/6621106f0000000007005949" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center group cursor-pointer">
+                                <div className="w-24 h-24 rounded-[2.5rem] bg-white/5 border border-white/10 flex items-center justify-center text-red-400 mb-6 group-hover:scale-110 transition-all shadow-2xl"><Icon name="book-open" size={56} weight="fill" /></div>
+                                <div className="text-[13px] text-gray-400 font-black mb-2 uppercase tracking-[0.3em] opacity-60">Xiaohongshu</div>
+                                <div className="text-3xl font-black tracking-tighter text-white">小红书主页</div>
+                            </a>
+                        </div>
+                    </div>
+                    {showWechat && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6" onClick={() => setShowWechat(false)}>
+                            <div className="absolute inset-0 bg-black/90 backdrop-blur-2xl"></div>
+                            <div className="relative z-10 glass-card p-4 rounded-[2.5rem] bg-neutral-900 border-white/10 max-w-sm w-full animate-in fade-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
+                                <button className="absolute -top-12 right-0 text-white hover:text-indigo-400 transition-colors" onClick={() => setShowWechat(false)}><Icon name="x" weight="bold" size={32} /></button>
+                                <img src="https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/24d623b1223214f4a1c28311a903572a.png" className="w-full rounded-3xl shadow-2xl" alt="Wechat QR" />
+                                <p className="text-gray-400 text-[10px] font-black mt-4 tracking-[0.3em] uppercase opacity-70">Scan to Add Wechat</p>
+                            </div>
+                        </div>
+                    )}
+                </section>
+            );
+        };
+
+        const App = () => {
+            useEffect(() => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+                }, { threshold: 0.1 });
+                document.querySelectorAll('.reveal').forEach(s => observer.observe(s));
+            }, []);
+
+            return (
+                <div className="relative min-h-screen">
+                    {/* 自定义高斯模糊图片背景 */}
+                    <div className="custom-site-bg"></div>
+                    <div className="blob blob-1"></div><div className="blob blob-2"></div>
+                    <div className="grid-bg"></div>
+                    <div className="scanline-overlay"></div>
+                    
+                    <div className="side-text left-6">DENGZHIWEI / VISIONARY DESIGNER</div>
+                    <div className="side-text right-6">AIGC CREATIVE LAB / 2026</div>
+
+                    <Navbar /><Hero /><About /><Tech /><Experience /><Works /><Contact />
+                    
+                    <footer className="py-20 border-t border-white/10 text-center px-10 bg-black/40 backdrop-blur-md">
+                        <div className="text-[13px] text-gray-500 font-black tracking-[0.5em] uppercase mb-6 italic opacity-60">© 2024 DENGZHIWEI / AIGC ARCHITECT</div>
+                        <div className="text-sm text-gray-600 font-medium tracking-[0.1em] opacity-40">网站由 AI 搭建 / WEBSITE BUILT BY AI</div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
