@@ -13,6 +13,8 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Polyv Player SDK -->
+    <script src="https://player.polyv.net/resp/vod-player/latest/player.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -456,11 +458,11 @@
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10 relative z-10">
                                     {profileData.map((item, i) => (
                                         <div key={i} className="group/item">
-                                            <div className="flex items-center gap-2 mb-2 opacity-50 group-hover/item:opacity-100 transition-opacity">
+                                            <div className="flex items-center gap-2 mb-2 opacity-50 transition-opacity">
                                                 <Icon name={item.icon} size={14} className="text-indigo-400" />
                                                 <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{item.label}</div>
                                             </div>
-                                            <div className="text-base md:text-lg font-bold text-white group-hover/item:text-indigo-300 transition-colors leading-tight tracking-tight">{item.value}</div>
+                                            <div className="text-base md:text-lg font-bold text-white transition-colors leading-tight tracking-tight">{item.value}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -580,10 +582,53 @@
             );
         };
 
+        const PolyvPlayer = ({ vid }) => {
+            const containerId = `plv_player_${vid}`;
+            useEffect(() => {
+                let player = null;
+                const timer = setTimeout(() => {
+                    if (window.polyvPlayer) {
+                        player = window.polyvPlayer({
+                            'wrap': `#${containerId}`,
+                            'width': '100%',
+                            'height': '100%',
+                            'vid': vid,
+                            'playsafe': '',
+                            'autoplay': true
+                        });
+                    }
+                }, 500); // 确保容器已渲染
+                
+                return () => {
+                    clearTimeout(timer);
+                    if (player && player.destroy) player.destroy();
+                };
+            }, [vid]);
+
+            return <div id={containerId} className="w-full h-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl"></div>;
+        };
+
         const Works = () => {
             const [selectedWork, setSelectedWork] = useState(null);
             const workItems = [
-                { id: 1, type: 'video', img: 'https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/31.jpg', videoSrc: 'https://sns-video-hw.xhscdn.com/stream/1/110/258/01e985b616b7776e010370019c325415ec_258.mp4', title: '小米YU7 AIGC 宣传片', cat: 'VIDEO PRODUCTION', detail: '这是一部全AI流程制作的小米YU7宣传短片。\n\n创作核心在于利用 Nanobnana (Gemini Image) 和 Midjourney 协同生成极具电影感的高品质分镜图；随后通过可灵 (Kling) 强大的时序一致性生成连贯、真实的视频片段。为了追求极致的 4K 视觉表现，采用了 SeedVR2 进行视频超分辨率放大处理，最终在剪映中完成精密的后期剪辑与视听同步。整个流程展示了 AIGC 在商业广告领域的高效生产力。' },
+                { 
+                    id: 1, 
+                    type: 'video', 
+                    img: 'https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/31.jpg', 
+                    videoSrc: 'https://sns-video-hw.xhscdn.com/stream/1/110/258/01e985b616b7776e010370019c325415ec_258.mp4',
+                    title: '小米YU7 AIGC 宣传片', 
+                    cat: 'VIDEO PRODUCTION', 
+                    detail: '这是一部全AI流程制作的小米YU7宣传短片。\n\n创作核心在于利用 Nanobnana (Gemini Image) 和 Midjourney 协同生成极具电影感的高品质分镜图；随后通过可灵 (Kling) 强大的时序一致性生成连贯、真实的视频片段。为了追求极致的 4K 视觉表现，采用了 SeedVR2 进行视频超分辨率放大处理，最终在剪映中完成精密的后期剪辑与视听同步。整个流程展示了 AIGC 在商业广告领域的高效生产力。' 
+                },
+                { 
+                    id: 5, 
+                    type: 'video', 
+                    img: 'https://raw.githubusercontent.com/Clover-DZW/-/refs/heads/main/44962c30e2f2954c40b5958fa4f95767.png', 
+                    polyvVid: 'r2e060b9e238eef606f2d39031399885_r',
+                    title: '香水 AIGC 宣传片', 
+                    cat: 'VIDEO PRODUCTION', 
+                    detail: '本作品是一部全AI流程制作的高档香水宣传短片，整体呈现优雅奢华的紫色调视觉氛围。\n\n创作流程：首先由 DeepSeek 深度生成脚本、分镜及文案逻辑；接着利用 Flux 模型生成质感细腻、色调统一的分镜头画面；随后通过可灵 (Kling) 强大的视频生成能力将画面转化为连贯、高保真动态视频；最后在剪映中完成精密的后期合成。该作品展现了 AIGC 在奢侈品创意表达上的无限潜力。' 
+                },
                 { id: 2, type: 'image', img: 'https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/Game%20Poster%20Layout%20with%20Main%20Title%20Clover%20in%20Handwritten%20Font%20and%20Decorative%20Text.png', gallery: ['https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/Game%20Poster%20Layout%20with%20Main%20Title%20Clover%20in%20Handwritten%20Font%20and%20Decorative%20Text.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/3D%20Style%20Character%20with%20Blue%20Gradient%20Background.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/3D%20Style%20Mechanical%20Bird%20with%20Tail%20Flame%20and%20Blue%20Gradient%20Background.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/18cdb38419288ed58cb0f69de.jpg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/uaoawz74264w_Anime_style_full-body_profile_view_of_a_cool_girl__8464a7a2-5f33-4569-8c62-1e424a730475.png'], title: '原创数字人/IP设计', cat: 'CHARACTER DESIGN', detail: '本项目展示了从概念构思到最终视觉呈现的全流程数字IP设计。起初通过手绘确定人物的基本构图与动态（Line Art），随后利用精准的提示词工程（Prompt Engineering）并在 Midjourney中保持角色一致性生成细节，最终通过Nanobnana生成具有 4K 建模级别精度的 3D 视觉形象。' },
                 { id: 3, type: 'image', img: 'https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/01.jpg', gallery: ['https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/01.jpg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/02.jpg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/03.jpg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/04.jpg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/05.jpg'], title: '潮玩文创IP设计', cat: 'IP DESIGN', detail: '本项目展示了潮玩文创IP的全流程设计。通过预设主题融合灵感，生成出花样繁多的IP衍生设计。整个设计流程通过 AIGC 高效赋能：首先使用 Midjourney 生成创意草图，接着利用 Flux 进行局部重绘，最后通过 Nanobnana 进行全局的精细化渲染处理。' },
                 { id: 4, type: 'image', img: 'https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/1765357640858-rmpy6n7to0d.png', gallery: ['https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/1765357640858-rmpy6n7to0d.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/98c68e16831fd58cfffcf8c836d86d2c.png','https://raw.githubusercontent.com/dzw1257388778-Netizen/-/refs/Heads/Main/98ed255cc076c870b40c0f59385b883c.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/f89c7d6ed9c8a42d092b7792a9410b73.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/fc478876b87638a5227e139d0ccd9467.jpeg','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/%E7%BE%8E%E5%BC%8F%E9%A3%8E%E6%A0%BC.png','https://raw.githubusercontent.com/dzw1257388778-netizen/-/refs/heads/main/%E5%8F%82%E8%80%83.jpg'], title: 'AI 空间重构：毛坯转风格化设计', cat: 'INTERIOR DESIGN', detail: '核心技术基于 ComfyUI 深度定制的节点工作流，实现了在严格保留原始毛坯房建筑结构的前提下，进行多风格的一键式高精度渲染生成。将创意出图速度提升了 90% 以上。' }
@@ -596,7 +641,7 @@
                     <div className="reveal masonry-grid">
                         {workItems.map((w, i) => (
                             <div key={w.id} className="break-inside-avoid mb-10 group relative rounded-[3.5rem] overflow-hidden glass-card cursor-pointer shadow-2xl border-white/5" onClick={() => setSelectedWork(w)}>
-                                <img src={w.img} className="w-full grayscale-[0.3] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105" />
+                                <img src={w.img} className="w-full grayscale-[0.3] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105" alt={w.title} />
                                 {w.type === 'video' && (
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
@@ -620,18 +665,33 @@
                             <div className="reveal active glass-card w-full max-w-6xl rounded-[4rem] overflow-hidden relative z-10 flex flex-col lg:flex-row bg-neutral-950 border-white/10 max-h-[90vh]" onClick={e => e.stopPropagation()}>
                                 <button className="absolute top-8 right-8 w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 z-30" onClick={() => setSelectedWork(null)}><Icon name="x" weight="bold" /></button>
                                 <div className="lg:w-3/5 relative overflow-y-auto no-scrollbar bg-[#0a0a0a]">
-                                    {selectedWork.videoSrc ? (
-                                        <div className="h-full flex items-center justify-center bg-black"><video src={selectedWork.videoSrc} controls autoPlay className="w-full max-h-full" /></div>
+                                    {selectedWork.polyvVid ? (
+                                        <div className="h-full flex items-center justify-center bg-black">
+                                            <PolyvPlayer vid={selectedWork.polyvVid} />
+                                        </div>
+                                    ) : selectedWork.videoSrc ? (
+                                        <div className="h-full flex items-center justify-center bg-black">
+                                            <video 
+                                                key={selectedWork.videoSrc}
+                                                src={selectedWork.videoSrc} 
+                                                controls 
+                                                autoPlay 
+                                                muted
+                                                playsInline
+                                                referrerPolicy="no-referrer"
+                                                className="w-full max-h-full rounded-2xl shadow-2xl" 
+                                            />
+                                        </div>
                                     ) : selectedWork.gallery ? (
                                         <div className="flex flex-col gap-4 p-4 md:p-8">{selectedWork.gallery.map((src, idx) => (<img key={idx} src={src} className="w-full rounded-3xl shadow-2xl" alt={`gallery-${idx}`} />))}</div>
-                                    ) : (<div className="h-full"><img src={selectedWork.img} className="w-full h-full object-cover" /></div>)}
+                                    ) : (<div className="h-full"><img src={selectedWork.img} className="w-full h-full object-cover" alt={selectedWork.title} /></div>)}
                                 </div>
                                 <div className="lg:w-2/5 p-12 md:p-16 flex flex-col justify-start overflow-y-auto bg-neutral-950/50 backdrop-blur-sm border-l border-white/5 text-left">
                                     <span className="text-indigo-500 font-black text-xs tracking-[0.3em] uppercase mb-8">{selectedWork.cat}</span>
                                     <h3 className="text-4xl font-black mb-10 tracking-tighter leading-tight uppercase leading-none">{selectedWork.title}</h3>
                                     <div className="h-[1px] w-12 bg-white/10 mb-8"></div>
                                     <p className="text-gray-300 leading-relaxed text-lg font-light mb-12 whitespace-pre-wrap text-justify">{selectedWork.detail}</p>
-                                    <div className="mt-auto pt-8 border-t border-white/5 flex gap-4"><div className="px-5 py-2 rounded-full border border-white/10 text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-60">AIGC Showcase</div><div className="px-5 py-2 rounded-full border border-white/10 text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-60">2024 Project</div></div>
+                                    <div className="mt-auto pt-8 border-t border-white/5 flex gap-4"><div className="px-5 py-2 rounded-full border border-white/10 text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-60">AIGC Showcase</div><div className="px-5 py-2 rounded-full border border-white/10 text-[10px] font-black text-gray-500 uppercase tracking-widest opacity-60">2026 Project</div></div>
                                 </div>
                             </div>
                         </div>
@@ -701,7 +761,7 @@
                     <Navbar /><Hero /><About /><Tech /><Experience /><Works /><Contact />
                     
                     <footer className="py-20 border-t border-white/10 text-center px-10 bg-black/40 backdrop-blur-md">
-                        <div className="text-[13px] text-gray-500 font-black tracking-[0.5em] uppercase mb-6 italic opacity-60">© 2024 DENGZHIWEI / AIGC ARCHITECT</div>
+                        <div className="text-[13px] text-gray-500 font-black tracking-[0.5em] uppercase mb-6 italic opacity-60">© 2026 DENGZHIWEI / AIGC ARCHITECT</div>
                         <div className="text-sm text-gray-600 font-medium tracking-[0.1em] opacity-40">网站由 AI 搭建 / WEBSITE BUILT BY AI</div>
                     </footer>
                 </div>
